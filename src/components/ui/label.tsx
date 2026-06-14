@@ -1,5 +1,5 @@
 import type { LabelHTMLAttributes } from 'react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/shared/lib/utils'
 
 export function Label({
   className,

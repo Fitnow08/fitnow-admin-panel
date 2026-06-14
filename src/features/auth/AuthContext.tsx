@@ -1,4 +1,4 @@
-import { createContext, use, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { isAxiosError } from "axios";
 import {
   api,
@@ -6,13 +6,8 @@ import {
   getToken,
   setRefreshToken,
   setToken,
-} from "@/lib/api";
-
-interface AuthContextValue {
-  isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
-}
+} from "@/shared/lib/api";
+import { AuthContext } from "./useAuth";
 
 // Соответствует Go-структуре User (json snake_case)
 interface ILoginResponse {
@@ -22,7 +17,6 @@ interface ILoginResponse {
   refresh_token: string;
   access_token: string;
 }
-const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(() => !!getToken());
@@ -63,10 +57,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {children}
     </AuthContext>
   );
-}
-
-export function useAuth() {
-  const ctx = use(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
-  return ctx;
 }

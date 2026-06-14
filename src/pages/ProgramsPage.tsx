@@ -11,27 +11,27 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
-import { TrainService } from "@/shared/service/train";
+import { ProgramService } from "@/shared/service/program";
 
-export function WorkoutsPage() {
+export function ProgramsPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["trains"],
-    queryFn: TrainService.getAllTrains,
+    queryKey: ["programs"],
+    queryFn: ProgramService.getAllPrograms,
   });
 
   const remove = useMutation({
-    mutationFn: TrainService.deleteTrain,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["trains"] }),
+    mutationFn: ProgramService.deleteProgram,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["programs"] }),
   });
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Тренировки</h1>
-        <Button onClick={() => navigate("/workouts/new")}>
+        <h1 className="text-2xl font-bold">Программы</h1>
+        <Button onClick={() => navigate("/programs/new")}>
           <Plus className="size-4" />
           Создать
         </Button>
@@ -40,35 +40,35 @@ export function WorkoutsPage() {
         <CardContent className="pt-6">
           {isLoading && <p className="text-muted-foreground">Загрузка…</p>}
           {isError && (
-            <p className="text-destructive">Не удалось загрузить тренировки</p>
+            <p className="text-destructive">Не удалось загрузить программы</p>
           )}
           {data && (
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Название</TableHead>
-                  <TableHead>Тип</TableHead>
                   <TableHead>Сложность</TableHead>
-                  <TableHead>Длительность</TableHead>
-                  <TableHead>Калории</TableHead>
+                  <TableHead>Недель</TableHead>
+                  <TableHead>Тренировок</TableHead>
                   <TableHead>Доступ</TableHead>
                   <TableHead className="w-12" />
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.map((train) => (
+                {data.map((program) => (
                   <TableRow
-                    key={train.id}
-                    onClick={() => navigate(`/workouts/${train.id}`)}
+                    key={program.id}
+                    onClick={() => navigate(`/programs/${program.id}`)}
                     className="cursor-pointer"
                   >
-                    <TableCell className="font-medium">{train.title}</TableCell>
-                    <TableCell>{train.type}</TableCell>
-                    <TableCell>{train.difficulty}</TableCell>
-                    <TableCell>{train.duration} мин</TableCell>
-                    <TableCell>{train.calories} ккал</TableCell>
+                    <TableCell className="font-medium">
+                      {program.title}
+                    </TableCell>
+                    <TableCell>{program.difficulty}</TableCell>
+                    <TableCell>{program.weeks}</TableCell>
+                    <TableCell>{program.trains_count}</TableCell>
                     <TableCell>
-                      {train.is_public ? "Публичная" : "Приватная"}
+                      {program.is_public ? "Публичная" : "Приватная"}
                     </TableCell>
                     <TableCell>
                       <Button
@@ -76,7 +76,7 @@ export function WorkoutsPage() {
                         size="icon"
                         onClick={(e) => {
                           e.stopPropagation();
-                          remove.mutate(train.id);
+                          remove.mutate(program.id);
                         }}
                         disabled={remove.isPending}
                       >

@@ -1,7 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Trash2 } from 'lucide-react'
-import { deleteUser, fetchUsers } from '@/features/users/api'
-import { Button } from '@/components/ui/button'
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -9,21 +8,22 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Card, CardContent } from '@/components/ui/card'
+} from "@/components/ui/table";
+import { Card, CardContent } from "@/components/ui/card";
+import { UserService } from "@/shared/service/user";
 
 export function UsersPage() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['users'],
-    queryFn: fetchUsers,
-  })
+    queryKey: ["users"],
+    queryFn: UserService.getAllUsers,
+  });
 
   const remove = useMutation({
-    mutationFn: deleteUser,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
-  })
+    mutationFn: UserService.deleteUser,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["users"] }),
+  });
 
   return (
     <div className="flex flex-col gap-6">
@@ -32,7 +32,9 @@ export function UsersPage() {
         <CardContent className="pt-6">
           {isLoading && <p className="text-muted-foreground">Загрузка…</p>}
           {isError && (
-            <p className="text-destructive">Не удалось загрузить пользователей</p>
+            <p className="text-destructive">
+              Не удалось загрузить пользователей
+            </p>
           )}
           {data && (
             <Table>
@@ -47,11 +49,9 @@ export function UsersPage() {
               <TableBody>
                 {data.map((user) => (
                   <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.name}</TableCell>
+                    <TableCell className="font-medium">{user.title}</TableCell>
                     <TableCell>{user.email}</TableCell>
-                    <TableCell>
-                      {new Date(user.createdAt).toLocaleDateString('ru-RU')}
-                    </TableCell>
+                    <TableCell>{user.role}</TableCell>
                     <TableCell>
                       <Button
                         variant="ghost"
@@ -70,5 +70,5 @@ export function UsersPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
