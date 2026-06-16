@@ -1,0 +1,11 @@
+services:
+  admin:
+    build:
+      context: .
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://127.0.0.1:7000/api/v1}
+    image: fitnow-admin
+    container_name: fitnow-admin
+    ports:
+      - "8080:80"
+    restart: unless-stopped
