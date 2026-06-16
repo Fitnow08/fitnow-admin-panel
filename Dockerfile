@@ -14,7 +14,7 @@ WORKDIR /app
 FROM base AS builder
 
 # Сначала только манифесты — слой install кешируется, пока не менялись lock/package.json
-COPY package.json pnpm-lock.yaml .npmrc ./
+COPY package.json pnpm-lock.yaml  ./
 # Кеш-маунт стора pnpm ускоряет повторные сборки (нужен BuildKit)
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile
