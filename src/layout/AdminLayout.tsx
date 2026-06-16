@@ -13,7 +13,7 @@ import {
   X,
 } from 'lucide-react'
 import { useAuth } from '@/features/auth/useAuth'
-import { useTheme } from '@/features/theme/ThemeContext'
+import { useTheme } from '@/shared/hooks/useTheme'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/shared/lib/utils'
 

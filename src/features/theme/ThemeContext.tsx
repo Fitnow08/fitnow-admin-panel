@@ -1,12 +1,5 @@
-import { createContext, use, useEffect, useState, type ReactNode } from "react";
-
-type Theme = "light" | "dark";
-
-interface ThemeContextValue {
-  theme: Theme;
-  toggleTheme: () => void;
-  setTheme: (theme: Theme) => void;
-}
+import { useEffect, useState, type ReactNode } from "react";
+import { ThemeContext, type Theme } from "./theme-context";
 
 const THEME_KEY = "fitnow_admin_theme";
 
@@ -18,8 +11,6 @@ function getInitialTheme(): Theme {
     ? "dark"
     : "light";
 }
-
-const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
@@ -39,10 +30,4 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       {children}
     </ThemeContext>
   );
-}
-
-export function useTheme() {
-  const ctx = use(ThemeContext);
-  if (!ctx) throw new Error("useTheme must be used within ThemeProvider");
-  return ctx;
 }

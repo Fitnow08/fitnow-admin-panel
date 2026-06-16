@@ -1,6 +1,11 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -13,14 +18,43 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { TrainService } from "@/shared/service/train";
 
+const PAGE_SIZE = 20;
+
 export function WorkoutsPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["trains"],
-    queryFn: TrainService.getAllTrains,
+  const {
+    data,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["trains", "list"],
+    queryFn: ({ pageParam }) =>
+      TrainService.getTrains({ cursor: pageParam, limit: PAGE_SIZE }),
+    initialPageParam: "",
+    getNextPageParam: (lastPage) =>
+      lastPage.has_more ? lastPage.next_cursor : undefined,
   });
+
+  const trains = data?.pages.flatMap((page) => page.trains) ?? [];
+
+  // Автоподгрузка при появлении «маяка» в зоне видимости.
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const remove = useMutation({
     mutationFn: TrainService.deleteTrain,
@@ -42,7 +76,7 @@ export function WorkoutsPage() {
           {isError && (
             <p className="text-destructive">Не удалось загрузить тренировки</p>
           )}
-          {data && (
+          {!isLoading && !isError && (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -56,7 +90,7 @@ export function WorkoutsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.map((train) => (
+                {trains.map((train) => (
                   <TableRow
                     key={train.id}
                     onClick={() => navigate(`/workouts/${train.id}`)}
@@ -87,6 +121,13 @@ export function WorkoutsPage() {
                 ))}
               </TableBody>
             </Table>
+          )}
+          {/* Маяк автоподгрузки + индикатор следующей страницы */}
+          <div ref={sentinelRef} className="h-1" />
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-4 text-muted-foreground">
+              <Loader2 className="size-4 animate-spin" />
+            </div>
           )}
         </CardContent>
       </Card>
